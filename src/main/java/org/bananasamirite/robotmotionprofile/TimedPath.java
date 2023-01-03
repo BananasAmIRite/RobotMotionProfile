@@ -1,4 +1,4 @@
-package frc.robot;
+package org.bananasamirite.robotmotionprofile;
 
 public class TimedPath {
     private final Path path;

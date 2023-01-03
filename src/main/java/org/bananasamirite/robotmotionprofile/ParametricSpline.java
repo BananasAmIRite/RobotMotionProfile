@@ -1,4 +1,4 @@
-package frc.robot;
+package org.bananasamirite.robotmotionprofile;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +27,7 @@ public class ParametricSpline {
     }
 
     public double getArcLengthAtTime(double time, double precision) {
-        return Utils.integrate((t) -> Math.sqrt(Math.pow(getDxAtTime(t), 2) + Math.pow(getDyAtTime(t), 2)), 0, time, precision);
+        return IntegrationUtils.integrate((t) -> Math.sqrt(Math.pow(getDxAtTime(t), 2) + Math.pow(getDyAtTime(t), 2)), 0, time, precision);
     }
 
     public double getTotalTime() {
@@ -110,15 +110,5 @@ public class ParametricSpline {
             ));
         }
         return fromWaypoints(parsedWaypoints);
-    }
-
-    public static void main(String[] args) throws IOException {
-        TankMotionProfile prof = new TankMotionProfile(fromFile(new File("C:/Users/jason/Documents/cool.json")),
-                new TankMotionProfile.TankMotionProfileConstraints(3, 3));
-        double totalTime = prof.getTotalTime();
-        for (double i = 0; i <= totalTime; i += 0.01) {
-            System.out.println("current: " + prof.getStateAtTime(i));
-            System.out.println("old: " + prof.getStateAtTime_old(i));
-        }
     }
 }

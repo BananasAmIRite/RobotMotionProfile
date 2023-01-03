@@ -1,4 +1,4 @@
-package frc.robot;
+package org.bananasamirite.robotmotionprofile;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -122,6 +122,7 @@ public class TankMotionProfile {
         return this.nodes;
     }
 
+    @Deprecated
     public Trajectory.State getStateAtTime_old(double time) {
         double totalTime = 0;
         for (MotionProfileNode node : this.nodes) {
@@ -138,7 +139,6 @@ public class TankMotionProfile {
                                 new Translation2d(spline.getXAtTime(splineTime), spline.getYAtTime(splineTime)),
                                 new Rotation2d(Math.atan2(spline.getDyAtTime(splineTime), spline.getDxAtTime(splineTime)))
                         ),
-//                        node.curvature
                         spline.signedCurvatureAt(splineTime)
                 );
             }
@@ -164,9 +164,9 @@ public class TankMotionProfile {
                 double angularVelocity = node.velocity * node.curvature;
                 double angularAcceleration = (nextNode.velocity * nextNode.curvature - node.velocity * node.curvature) / (node.time);
 
-                double dx = Utils.integrate((t) -> (node.velocity + node.acceleration * t) *
+                double dx = IntegrationUtils.integrate((t) -> (node.velocity + node.acceleration * t) *
                         Math.cos(node.pose.getRotation().getRadians() + angularVelocity * t + angularAcceleration * t * t / 2), 0, dt, dt*1E-2);
-                double dy = Utils.integrate((t) -> (node.velocity + node.acceleration * t) *
+                double dy = IntegrationUtils.integrate((t) -> (node.velocity + node.acceleration * t) *
                         Math.sin(node.pose.getRotation().getRadians() + angularVelocity * t + angularAcceleration * t * t / 2), 0, dt, dt*1E-2);
 
                 double vx = (node.velocity + node.acceleration * dt) *

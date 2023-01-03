@@ -1,11 +1,10 @@
-package frc.robot;
+package org.bananasamirite.robotmotionprofile;
 
 import org.ejml.simple.SimpleMatrix;
 
 import java.util.stream.IntStream;
 
 public class Path {
-
     private final double[] xCoeffs;
     private final double[] yCoeffs;
 

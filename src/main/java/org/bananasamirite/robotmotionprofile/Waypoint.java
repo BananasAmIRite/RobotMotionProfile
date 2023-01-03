@@ -1,4 +1,4 @@
-package frc.robot;
+package org.bananasamirite.robotmotionprofile;
 
 public class Waypoint {
     private final double runTime;

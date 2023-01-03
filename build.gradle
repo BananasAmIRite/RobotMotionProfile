@@ -1,9 +1,15 @@
 plugins {
     id 'java'
+    id "edu.wpi.first.GradleRIO" version "2022.4.1"
+    id("maven-publish")
 }
 
 group 'org.bananasamirite'
-version '1.0-SNAPSHOT'
+version '1.0'
+
+def javaVersion = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 repositories {
     mavenCentral()
@@ -12,8 +18,35 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    implementation wpi.java.deps.wpilib()
 }
 
 test {
     useJUnitPlatform()
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/BananasAmIRite/RobotMotionProfile")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            }
+        }
+        maven {
+            name = "local"
+            url = layout.buildDirectory.dir('repo')
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            groupId 'org.bananasamirite'
+            artifactId 'robotmotionprofile'
+            version '1.0'
+            from(components.java)
+        }
+    }
 }
