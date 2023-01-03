@@ -1,11 +1,11 @@
 package org.bananasamirite.robotmotionprofile;
 
 public class Waypoint {
-    private final double runTime;
-    private final double x;
-    private final double y;
-    private final double angle;
-    private final double weight;
+    protected double runTime;
+    protected double x;
+    protected double y;
+    protected double angle;
+    protected double weight;
 
     public Waypoint(double x, double y, double angle, double weight, double runTime) {
         this.x = x;
