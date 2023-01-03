@@ -1,13 +1,9 @@
 package org.bananasamirite.robotmotionprofile;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
+import org.bananasamirite.robotmotionprofile.geometry.Position;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TankMotionProfile {
     private final List<MotionProfileNode> nodes;
@@ -31,12 +27,10 @@ public class TankMotionProfile {
             // NOTE: find the velocities first, then do acceleration and time
             // forward pass velocity
             MotionProfileNode lastNode = new MotionProfileNode(0, 0,
-                    new Pose2d(
-                            new Translation2d(
-                                    spline.getXAtTime(0),
-                                    spline.getYAtTime(0)
-                            ),
-                            new Rotation2d(Math.atan2(spline.getDyAtTime(0), spline.getDxAtTime(0)))
+                    new Position(
+                            spline.getXAtTime(0),
+                            spline.getYAtTime(0),
+                            Math.atan2(spline.getDyAtTime(0), spline.getDxAtTime(0))
                     ),
                     spline.signedCurvatureAt(0), 0, 0, 0, 0
             );
@@ -52,14 +46,10 @@ public class TankMotionProfile {
                 double maxLinearVelocity = constraints.maxVelocity - angularVelocity;
                 newLinearVelocity = Math.min(newLinearVelocity, maxLinearVelocity);
 
-                MotionProfileNode node = new MotionProfileNode(newLinearVelocity, 0, new Pose2d(
-                        new Translation2d(
+                MotionProfileNode node = new MotionProfileNode(newLinearVelocity, 0, new Position(
                                 spline.getXAtTime(splineTime),
-                                spline.getYAtTime(splineTime)
-                        ),
-                        new Rotation2d(
+                                spline.getYAtTime(splineTime),
                                 Math.atan2(spline.getDyAtTime(splineTime), spline.getDxAtTime(splineTime))
-                        )
                 ), 1 / radius, 0, i, splineTime, 0);
 
                 lastNode = node;
@@ -123,7 +113,7 @@ public class TankMotionProfile {
     }
 
     @Deprecated
-    public Trajectory.State getStateAtTime_old(double time) {
+    public MotionProfileState getStateAtTime_old(double time) {
         double totalTime = 0;
         for (MotionProfileNode node : this.nodes) {
             if (totalTime <= time && totalTime + node.time >= time) {
@@ -131,15 +121,15 @@ public class TankMotionProfile {
                 double ds = node.velocity * dt + node.acceleration * dt * dt / 2;
                 double splineTime = calculateTimeFromSplineDistance(spline, node.distanceTravelled + ds, 1E-1);
 
-                return new Trajectory.State(
-                        time,
+                return new MotionProfileState(
                         node.velocity + node.acceleration * dt,
-                        node.acceleration,
-                        new Pose2d(
-                                new Translation2d(spline.getXAtTime(splineTime), spline.getYAtTime(splineTime)),
-                                new Rotation2d(Math.atan2(spline.getDyAtTime(splineTime), spline.getDxAtTime(splineTime)))
+                        dt,
+                        time,
+                        new Position(
+                                spline.getXAtTime(splineTime), spline.getYAtTime(splineTime),
+                                Math.atan2(spline.getDyAtTime(splineTime), spline.getDxAtTime(splineTime))
                         ),
-                        spline.signedCurvatureAt(splineTime)
+                        spline.signedCurvatureAt(splineTime), node.acceleration
                 );
             }
             totalTime += node.time;
@@ -150,7 +140,7 @@ public class TankMotionProfile {
     // less expensive to calculate, more preprocessing (small nodeLength) required for good results
     // simulates robot position using the average angular accelerations and velocities, which generates a curve close to the original curve
     // good thing is, this works without the original spline, so we can preprocess elsewhere and save to a file
-    public Trajectory.State getStateAtTime(double time) {
+    public MotionProfileState getStateAtTime(double time) {
         double totalTime = 0;  
         for (int i = 0; i < this.nodes.size()-1; i++) {
             MotionProfileNode node = this.nodes.get(i);
@@ -165,29 +155,27 @@ public class TankMotionProfile {
                 double angularAcceleration = (nextNode.velocity * nextNode.curvature - node.velocity * node.curvature) / (node.time);
 
                 double dx = IntegrationUtils.integrate((t) -> (node.velocity + node.acceleration * t) *
-                        Math.cos(node.pose.getRotation().getRadians() + angularVelocity * t + angularAcceleration * t * t / 2), 0, dt, dt*1E-2);
+                        Math.cos(node.pose.getRotation() + angularVelocity * t + angularAcceleration * t * t / 2), 0, dt, dt*1E-2);
                 double dy = IntegrationUtils.integrate((t) -> (node.velocity + node.acceleration * t) *
-                        Math.sin(node.pose.getRotation().getRadians() + angularVelocity * t + angularAcceleration * t * t / 2), 0, dt, dt*1E-2);
+                        Math.sin(node.pose.getRotation() + angularVelocity * t + angularAcceleration * t * t / 2), 0, dt, dt*1E-2);
 
                 double vx = (node.velocity + node.acceleration * dt) *
-                        Math.cos(node.pose.getRotation().getRadians() + angularVelocity * dt + angularAcceleration * dt * dt / 2);
+                        Math.cos(node.pose.getRotation() + angularVelocity * dt + angularAcceleration * dt * dt / 2);
                 double vy = (node.velocity + node.acceleration * dt) *
-                        Math.sin(node.pose.getRotation().getRadians() + angularVelocity * dt + angularAcceleration * dt * dt / 2);
+                        Math.sin(node.pose.getRotation() + angularVelocity * dt + angularAcceleration * dt * dt / 2);
 
-                double ax = node.acceleration * Math.cos(node.pose.getRotation().getRadians() + angularVelocity * dt + angularAcceleration * dt * dt / 2)
-                        - (node.velocity + node.acceleration * dt)*(angularVelocity+angularAcceleration * dt) * Math.sin(node.pose.getRotation().getRadians() + angularVelocity * dt + angularAcceleration * dt * dt / 2);
-                double ay = node.acceleration * Math.sin(node.pose.getRotation().getRadians() + angularVelocity * dt + angularAcceleration * dt * dt / 2)
-                        + (node.velocity + node.acceleration * dt)*(angularVelocity+angularAcceleration * dt) * Math.cos(node.pose.getRotation().getRadians() + angularVelocity * dt + angularAcceleration * dt * dt / 2);
+                double ax = node.acceleration * Math.cos(node.pose.getRotation() + angularVelocity * dt + angularAcceleration * dt * dt / 2)
+                        - (node.velocity + node.acceleration * dt)*(angularVelocity+angularAcceleration * dt) * Math.sin(node.pose.getRotation() + angularVelocity * dt + angularAcceleration * dt * dt / 2);
+                double ay = node.acceleration * Math.sin(node.pose.getRotation() + angularVelocity * dt + angularAcceleration * dt * dt / 2)
+                        + (node.velocity + node.acceleration * dt)*(angularVelocity+angularAcceleration * dt) * Math.cos(node.pose.getRotation() + angularVelocity * dt + angularAcceleration * dt * dt / 2);
 
-                return new Trajectory.State(
-                        time,
+                return new MotionProfileState(
                         node.velocity + node.acceleration * dt,
-                        node.acceleration,
-                        new Pose2d(
-                                new Translation2d(node.pose.getX() + dx, node.pose.getY() + dy),
-                                new Rotation2d(Math.atan2(vy, vx))
-                        ),
-                        (vx*ay-vy*ax)/Math.pow(vx*vx+vy*vy, 3/2.0)
+                        dt,
+                        time,
+                        new Position(node.pose.getX() + dx, node.pose.getY() + dy, Math.atan2(vy, vx)),
+                        (vx*ay-vy*ax)/Math.pow(vx*vx+vy*vy, 3/2.0),
+                        node.acceleration
                 );
             }
             totalTime += node.time;
@@ -199,21 +187,59 @@ public class TankMotionProfile {
         return this.nodes.get(this.nodes.size() - 1).totalTime; 
     }
 
-    public Trajectory asTrajectory() {
-        return new Trajectory(this.getNodes().stream().map(MotionProfileNode::asState).collect(Collectors.toList()));
+    public static class MotionProfileState {
+        private final double velocity;
+        private final double time;
+        private final double totalTime;
+        private final Position pose;
+        private final double curvature;
+        private final double acceleration;
+
+        public MotionProfileState(double velocity, double time, double totalTime, Position pose, double curvature, double acceleration) {
+            this.velocity = velocity;
+            this.time = time;
+            this.totalTime = totalTime;
+            this.pose = pose;
+            this.curvature = curvature;
+            this.acceleration = acceleration;
+        }
+
+        public double getVelocity() {
+            return velocity;
+        }
+
+        public Position getPose() {
+            return pose;
+        }
+
+        public double getTime() {
+            return time;
+        }
+
+        public double getCurvature() {
+            return curvature;
+        }
+
+        public double getTotalTime() {
+            return totalTime;
+        }
+
+        public double getAcceleration() {
+            return acceleration;
+        }
     }
 
     public static class MotionProfileNode {
         private double velocity;
         private double time;
-        private Pose2d pose;
+        private Position pose;
         private double curvature;
         private double acceleration;
         private double distanceTravelled;
         private double splineTime;
         private double totalTime;
 
-        public MotionProfileNode(double velocity, double time, Pose2d pose, double curvature, double acceleration, double distanceTravelled, double splineTime, double totalTime) {
+        public MotionProfileNode(double velocity, double time, Position pose, double curvature, double acceleration, double distanceTravelled, double splineTime, double totalTime) {
             this.velocity = velocity;
             this.time = time;
             this.pose = pose;
@@ -236,7 +262,7 @@ public class TankMotionProfile {
             return time;
         }
 
-        public Pose2d getPose() {
+        public Position getPose() {
             return pose;
         }
 
@@ -248,8 +274,8 @@ public class TankMotionProfile {
             return totalTime;
         }
 
-        public Trajectory.State asState() {
-            return new Trajectory.State(totalTime, velocity, acceleration, pose, curvature);
+        public MotionProfileState asState() {
+            return new MotionProfileState(velocity, time, totalTime, pose, curvature, acceleration);
         }
 
         @Override

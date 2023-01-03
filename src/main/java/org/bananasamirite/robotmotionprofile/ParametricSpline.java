@@ -1,10 +1,5 @@
 package org.bananasamirite.robotmotionprofile;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -94,21 +89,5 @@ public class ParametricSpline {
             timeSoFar += p.getRunTime();
         }
         return new ParametricSpline(paths);
-    }
-
-    public static ParametricSpline fromFile(File file) throws IOException {
-        JsonNode node = new ObjectMapper().readTree(file);
-        JsonNode waypoints = node.get("waypoints");
-        List<Waypoint> parsedWaypoints = new ArrayList<>();
-        for (JsonNode waypoint : waypoints) {
-            parsedWaypoints.add(new Waypoint(
-                    waypoint.get("x").asDouble(),
-                    waypoint.get("y").asDouble(),
-                    waypoint.get("angle").asDouble(),
-                    waypoint.get("weight").asDouble(),
-                    waypoint.get("time").asDouble()
-            ));
-        }
-        return fromWaypoints(parsedWaypoints);
     }
 }
