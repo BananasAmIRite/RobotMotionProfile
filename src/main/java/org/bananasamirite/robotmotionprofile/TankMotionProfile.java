@@ -125,7 +125,7 @@ public class TankMotionProfile {
             nodes.add(lastNode);
 
             for (double i = nodeLength; i < spline.getTotalLength(); i += nodeLength) {
-                double splineTime = calculateTimeFromSplineDistance(spline, i, nodeLength);
+                double splineTime = calculateTimeFromSplineDistance(spline, i, 1E-1);
                 double radius = spline.signedRadiusAt(splineTime);
 
                 // vf^2 = v0^2+2ad
@@ -190,6 +190,7 @@ public class TankMotionProfile {
         while (true) {
             double time = (timeLower + timeUpper) / 2;
             double dist = spline.getArcLengthAtTime(time, precision);
+            System.out.println(Math.abs(timeUpper - timeLower));
             if (Math.abs(distance - dist) <= precision || Math.abs(timeUpper - timeLower) < 1E-9) return time; // either we've zeroed in on a time or the distance is precise enough
             if (distance - dist < 0) timeUpper = time;
             if (distance - dist > 0) timeLower = time;
@@ -327,6 +328,8 @@ public class TankMotionProfile {
         private double splineTime;
         private double totalTime;
 
+        public MotionProfileNode() {}
+
         public MotionProfileNode(double velocity, double time, Position pose, double curvature, double acceleration, double distanceTravelled, double splineTime, double totalTime) {
             this.velocity = velocity;
             this.time = time;
@@ -362,6 +365,38 @@ public class TankMotionProfile {
             return totalTime;
         }
 
+        public void setVelocity(double velocity) {
+            this.velocity = velocity;
+        }
+
+        public void setAcceleration(double acceleration) {
+            this.acceleration = acceleration;
+        }
+
+        public void setCurvature(double curvature) {
+            this.curvature = curvature;
+        }
+
+        public void setDistanceTravelled(double distanceTravelled) {
+            this.distanceTravelled = distanceTravelled;
+        }
+
+        public void setPose(Position pose) {
+            this.pose = pose;
+        }
+
+        public void setSplineTime(double splineTime) {
+            this.splineTime = splineTime;
+        }
+
+        public void setTotalTime(double totalTime) {
+            this.totalTime = totalTime;
+        }
+
+        public void setTime(double time) {
+            this.time = time;
+        }
+
         public MotionProfileState asState() {
             return new MotionProfileState(velocity, time, totalTime, pose, curvature, acceleration);
         }
@@ -382,8 +417,8 @@ public class TankMotionProfile {
     }
 
     public static class TankMotionProfileConstraints {
-        private final double maxVelocity;
-        private final double maxAcceleration;
+        private double maxVelocity;
+        private double maxAcceleration;
 
         public TankMotionProfileConstraints(double maxVel, double maxAccel) {
             this.maxVelocity = maxVel;
@@ -397,49 +432,18 @@ public class TankMotionProfile {
         public double getMaxVelocity() {
             return maxVelocity;
         }
+
+        public void setMaxAcceleration(double maxAcceleration) {
+            this.maxAcceleration = maxAcceleration;
+        }
+
+        public void setMaxVelocity(double maxVelocity) {
+            this.maxVelocity = maxVelocity;
+        }
     }
 
     public enum ProfileMethod {
         DISTANCE, 
         TIME
-    }
-
-
-    public static void main(String[] args) {
-        List<Waypoint> waypoints = new ArrayList<>();
-        waypoints.add(new Waypoint(0, 0, 0, 5, 2));
-        waypoints.add(new Waypoint(5, 4, Math.toRadians(45), 5, 2));
-        waypoints.add(new Waypoint(6, 8, 0, 5, 2));
-        waypoints.add(new Waypoint(8, 9, Math.toRadians(90), 5, 2));
-
-        ParametricSpline spline = ParametricSpline.fromWaypoints(waypoints);
-        TankMotionProfile.TankMotionProfileConstraints constraints = new TankMotionProfileConstraints(1, 1);
-
-        long st1 = System.nanoTime();
-        TankMotionProfile unoptimized = new TankMotionProfile(spline, ProfileMethod.DISTANCE, constraints);
-//        double a = run(unoptimized);
-        long st2 = System.nanoTime();
-
-        long st3 = System.nanoTime();
-        TankMotionProfile optimized = new TankMotionProfile(spline, ProfileMethod.TIME, constraints);
-//        double b = run(optimized);
-        long st4 = System.nanoTime();
-
-        System.out.println("Old: " + (st2 - st1));
-        System.out.println("New: " + (st4 - st3));
-    }
-
-    private static double run(TankMotionProfile profile) {
-        long totalQueryTime = 0;
-        int x = 0;
-        for (double i = 0; i < profile.getTotalTime(); i += 1E-3) {
-            long a = System.nanoTime();
-            profile.getStateAtTime(i);
-            long b = System.nanoTime();
-            totalQueryTime += b - a;
-            x++;
-        }
-        System.out.println(totalQueryTime);
-        return (double) totalQueryTime / x;
     }
 }
