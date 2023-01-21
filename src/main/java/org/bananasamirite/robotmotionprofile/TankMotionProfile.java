@@ -9,18 +9,106 @@ public class TankMotionProfile {
     private final List<MotionProfileNode> nodes;
     private ParametricSpline spline;
 
-    public TankMotionProfile(ParametricSpline spline, TankMotionProfileConstraints constraints) {
+    public TankMotionProfile(ParametricSpline spline, ProfileMethod type, TankMotionProfileConstraints constraints) {
         this.spline = spline;
-        this.nodes = calculateMotionProfile(spline, constraints, 0.1);
+        this.nodes = type == ProfileMethod.DISTANCE ? calculateDistanceMotionProfile(spline, constraints, 1E-3) : calculateTimeMotionProfile(spline, constraints, 1E-3);
     }
 
     public TankMotionProfile(List<MotionProfileNode> nodes) {
         this.nodes = nodes;
     }
 
+    private List<MotionProfileNode> calculateTimeMotionProfile(ParametricSpline spline, TankMotionProfileConstraints constraints, double timeSize) {
+        List<MotionProfileNode> nodes = new ArrayList<>();
+
+        {
+            // NOTE: find the velocities first, then do acceleration and time
+            // forward pass velocity
+            double distTravelled = 0; 
+            MotionProfileNode lastNode = new MotionProfileNode(0, 0,
+                    new Position(
+                            spline.getXAtTime(0),
+                            spline.getYAtTime(0),
+                            Math.atan2(spline.getDyAtTime(0), spline.getDxAtTime(0))
+                    ),
+                    spline.signedCurvatureAt(0), 0, 0, 0, 0
+            );
+            nodes.add(lastNode);
+
+            for (double i = timeSize; i < spline.getTotalTime(); i += timeSize) {
+
+                double nodeLength = Math.sqrt(
+                        Math.pow(spline.getYAtTime(i) - spline.getYAtTime(i-timeSize), 2) +
+                                Math.pow(spline.getXAtTime(i) - spline.getXAtTime(i-timeSize), 2)
+                );
+                distTravelled += nodeLength; 
+
+                double radius = spline.signedRadiusAt(i);
+
+                // vf^2 = v0^2+2ad
+
+                double newLinearVelocity = Math.sqrt(Math.pow(lastNode.velocity, 2) + 2 * constraints.maxAcceleration * nodeLength);
+                double angularVelocity = constraints.maxVelocity / (Math.abs(radius) + 1);
+                double maxLinearVelocity = constraints.maxVelocity - angularVelocity;
+                newLinearVelocity = Math.min(newLinearVelocity, maxLinearVelocity);
+
+                MotionProfileNode node = new MotionProfileNode(newLinearVelocity, 0, new Position(
+                                spline.getXAtTime(i),
+                                spline.getYAtTime(i),
+                                Math.atan2(spline.getDyAtTime(i), spline.getDxAtTime(i))
+                ), 1 / radius, 0, distTravelled, i, 0);
+
+                lastNode = node;
+                nodes.add(node);
+            }
+        }
+
+        // backward pass velocity
+        {
+            MotionProfileNode lastNode = nodes.get(nodes.size() - 1);
+            lastNode.velocity = 0;
+            lastNode.acceleration = 0;
+            for (int i = nodes.size() - 2; i >= 0; i--) {
+                MotionProfileNode curNode = nodes.get(i);
+//                if (curNode.velocity - lastNode.velocity < 0) continue;
+                double nodeLength = Math.sqrt(
+                        Math.pow(spline.getYAtTime(lastNode.splineTime) - spline.getYAtTime(curNode.splineTime), 2) +
+                                Math.pow(spline.getXAtTime(lastNode.splineTime) - spline.getXAtTime(curNode.splineTime), 2)
+                );
+                double newLinearVelocity = Math.sqrt(Math.pow(lastNode.velocity, 2) + 2 * constraints.maxAcceleration * nodeLength);
+
+                double radius = spline.signedRadiusAt(curNode.splineTime);
+                double angularVelocity = constraints.maxVelocity / (Math.abs(radius) + 1);
+                double maxLinearVelocity = constraints.maxVelocity - angularVelocity;
+                newLinearVelocity = Math.min(curNode.velocity, Math.min(newLinearVelocity, maxLinearVelocity));
+
+                curNode.velocity = newLinearVelocity;
+                lastNode = curNode;
+            }
+        }
+
+        double totalTime = 0;
+
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            MotionProfileNode n = nodes.get(i);
+            MotionProfileNode nextNode = nodes.get(i+1);
+
+            double ds = nextNode.distanceTravelled - n.distanceTravelled;
+
+            // a = (vf^2-v0^2)/2d
+            n.acceleration = (Math.pow(nextNode.velocity, 2) - Math.pow(n.velocity, 2)) / (2 * ds);
+            n.time = n.acceleration == 0 ? ds / n.velocity : (nextNode.velocity - n.velocity) / n.acceleration;
+
+            nextNode.totalTime = totalTime + n.time;
+            totalTime += n.time;
+        }
+
+        return nodes;
+    }
+
     // TODO: offload most of the computations to preprocessing somewhere else (maybe points creator program)
     // TODO: gotta apply voltage constraints as well maybe
-    private List<MotionProfileNode> calculateMotionProfile(ParametricSpline spline, TankMotionProfileConstraints constraints, double nodeLength) {
+    private List<MotionProfileNode> calculateDistanceMotionProfile(ParametricSpline spline, TankMotionProfileConstraints constraints, double nodeLength) {
         List<MotionProfileNode> nodes = new ArrayList<>();
 
         {
@@ -102,6 +190,7 @@ public class TankMotionProfile {
         while (true) {
             double time = (timeLower + timeUpper) / 2;
             double dist = spline.getArcLengthAtTime(time, precision);
+            System.out.println(Math.abs(timeUpper - timeLower));
             if (Math.abs(distance - dist) <= precision || Math.abs(timeUpper - timeLower) < 1E-9) return time; // either we've zeroed in on a time or the distance is precise enough
             if (distance - dist < 0) timeUpper = time;
             if (distance - dist > 0) timeLower = time;
@@ -234,10 +323,12 @@ public class TankMotionProfile {
         private double time;
         private Position pose;
         private double curvature;
-        private double acceleration;
-        private double distanceTravelled;
+        private double distanceTravelled; 
+        private double acceleration; 
         private double splineTime;
         private double totalTime;
+
+        public MotionProfileNode() {}
 
         public MotionProfileNode(double velocity, double time, Position pose, double curvature, double acceleration, double distanceTravelled, double splineTime, double totalTime) {
             this.velocity = velocity;
@@ -245,7 +336,7 @@ public class TankMotionProfile {
             this.pose = pose;
             this.curvature = curvature;
             this.acceleration = acceleration;
-            this.distanceTravelled = distanceTravelled;
+            this.distanceTravelled = distanceTravelled; 
             this.splineTime = splineTime;
             this.totalTime = totalTime;
         }
@@ -274,6 +365,38 @@ public class TankMotionProfile {
             return totalTime;
         }
 
+        public void setVelocity(double velocity) {
+            this.velocity = velocity;
+        }
+
+        public void setAcceleration(double acceleration) {
+            this.acceleration = acceleration;
+        }
+
+        public void setCurvature(double curvature) {
+            this.curvature = curvature;
+        }
+
+        public void setDistanceTravelled(double distanceTravelled) {
+            this.distanceTravelled = distanceTravelled;
+        }
+
+        public void setPose(Position pose) {
+            this.pose = pose;
+        }
+
+        public void setSplineTime(double splineTime) {
+            this.splineTime = splineTime;
+        }
+
+        public void setTotalTime(double totalTime) {
+            this.totalTime = totalTime;
+        }
+
+        public void setTime(double time) {
+            this.time = time;
+        }
+
         public MotionProfileState asState() {
             return new MotionProfileState(velocity, time, totalTime, pose, curvature, acceleration);
         }
@@ -294,8 +417,8 @@ public class TankMotionProfile {
     }
 
     public static class TankMotionProfileConstraints {
-        private final double maxVelocity;
-        private final double maxAcceleration;
+        private double maxVelocity;
+        private double maxAcceleration;
 
         public TankMotionProfileConstraints(double maxVel, double maxAccel) {
             this.maxVelocity = maxVel;
@@ -309,5 +432,18 @@ public class TankMotionProfile {
         public double getMaxVelocity() {
             return maxVelocity;
         }
+
+        public void setMaxAcceleration(double maxAcceleration) {
+            this.maxAcceleration = maxAcceleration;
+        }
+
+        public void setMaxVelocity(double maxVelocity) {
+            this.maxVelocity = maxVelocity;
+        }
+    }
+
+    public enum ProfileMethod {
+        DISTANCE, 
+        TIME
     }
 }
