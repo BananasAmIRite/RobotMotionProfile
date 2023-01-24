@@ -1,10 +1,12 @@
 package org.bananasamirite.robotmotionprofile.data;
 
+import org.bananasamirite.robotmotionprofile.TankMotionProfile;
+
 public class RobotConfiguration {
 
     private double dimensionX; 
     private double dimensionY; 
-    private TankMotionProfile.TankMotionProfileConstraints constraints; 
+    private TankMotionProfile.TankMotionProfileConstraints constraints;
 
     public RobotConfiguration() {}
 

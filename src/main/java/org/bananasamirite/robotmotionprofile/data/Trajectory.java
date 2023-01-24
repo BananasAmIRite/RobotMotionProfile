@@ -4,10 +4,13 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bananasamirite.robotmotionprofile.task.CommandTask;
-import org.bananasamirite.robotmotionprofile.task.GeneratedWaypointTask;
-import org.bananasamirite.robotmotionprofile.task.TrajectoryTask;
-import org.bananasamirite.robotmotionprofile.task.WaypointTask;
+import org.bananasamirite.robotmotionprofile.ParametricSpline;
+import org.bananasamirite.robotmotionprofile.TankMotionProfile;
+import org.bananasamirite.robotmotionprofile.Waypoint;
+import org.bananasamirite.robotmotionprofile.data.task.CommandTask;
+import org.bananasamirite.robotmotionprofile.data.task.GeneratedWaypointTask;
+import org.bananasamirite.robotmotionprofile.data.task.TrajectoryTask;
+import org.bananasamirite.robotmotionprofile.data.task.WaypointTask;
 
 import java.io.File;
 import java.io.IOException;
