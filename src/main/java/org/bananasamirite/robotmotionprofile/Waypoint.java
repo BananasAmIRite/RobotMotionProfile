@@ -6,13 +6,15 @@ public class Waypoint {
     protected double y;
     protected double angle;
     protected double weight;
+    protected TankMotionProfile.TankMotionProfileConstraints constraints; 
 
-    public Waypoint(double x, double y, double angle, double weight, double runTime) {
+    public Waypoint(double x, double y, double angle, double weight, double runTime, protected TankMotionProfile.TankMotionProfileConstraints constraints) {
         this.x = x;
         this.y = y;
         this.angle = angle;
         this.weight = weight;
         this.runTime = runTime;
+        this.constraints = constraints; 
     }
 
     public double getX() {
@@ -33,5 +35,9 @@ public class Waypoint {
 
     public double getRunTime() {
         return runTime;
+    }
+
+    public TankMotionProfile.TankMotionProfileConstraints getConstraints() {
+        return constraints; 
     }
 }
