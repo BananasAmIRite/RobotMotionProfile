@@ -1,4 +1,4 @@
-package org.bananasamirite.robotmotionprofile.task;
+package org.bananasamirite.robotmotionprofile.data.task;
 
 import org.bananasamirite.robotmotionprofile.ParametricSpline;
 import org.bananasamirite.robotmotionprofile.TankMotionProfile;

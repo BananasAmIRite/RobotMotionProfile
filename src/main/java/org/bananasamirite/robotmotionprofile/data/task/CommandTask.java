@@ -1,4 +1,4 @@
-package org.bananasamirite.robotmotionprofile.task;
+package org.bananasamirite.robotmotionprofile.data.task;
 
 import java.util.Arrays;
 import java.util.List;

@@ -1,13 +1,16 @@
-package org.bananasamirite.robotmotionprofile;
+package org.bananasamirite.robotmotionprofile.data;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bananasamirite.robotmotionprofile.task.CommandTask;
-import org.bananasamirite.robotmotionprofile.task.GeneratedWaypointTask;
-import org.bananasamirite.robotmotionprofile.task.TrajectoryTask;
-import org.bananasamirite.robotmotionprofile.task.WaypointTask;
+import org.bananasamirite.robotmotionprofile.ParametricSpline;
+import org.bananasamirite.robotmotionprofile.TankMotionProfile;
+import org.bananasamirite.robotmotionprofile.Waypoint;
+import org.bananasamirite.robotmotionprofile.data.task.CommandTask;
+import org.bananasamirite.robotmotionprofile.data.task.GeneratedWaypointTask;
+import org.bananasamirite.robotmotionprofile.data.task.TrajectoryTask;
+import org.bananasamirite.robotmotionprofile.data.task.WaypointTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +29,11 @@ public class Trajectory {
     })
     private List<TrajectoryTask> tasks;
 
+    private RobotConfiguration config; 
+
     public Trajectory() {}
 
-    public Trajectory(List<TrajectoryTask> tasks) {
+    public Trajectory(List<TrajectoryTask> tasks, RobotConfiguration config) {
         this.tasks = tasks;
     }
 
@@ -38,6 +43,14 @@ public class Trajectory {
 
     public void setTasks(List<TrajectoryTask> tasks) {
         this.tasks = tasks;
+    }
+
+    public RobotConfiguration getConfig() {
+        return config; 
+    }
+
+    public void setConfig(RobotConfiguration config) {
+        this.config = config; 
     }
 
     public static Trajectory fromFile(File file) throws IOException {
@@ -53,7 +66,10 @@ public class Trajectory {
         TankMotionProfile p = new TankMotionProfile(ParametricSpline.fromWaypoints(waypoints), TankMotionProfile.ProfileMethod.TIME, constraints);
         tasks.add(new WaypointTask(waypoints, TankMotionProfile.ProfileMethod.TIME, constraints));
         tasks.add(new GeneratedWaypointTask(waypoints, TankMotionProfile.ProfileMethod.TIME, constraints, p.getNodes()));
-        String t = mapper.writeValueAsString(new Trajectory(tasks));
+        String t = mapper.writeValueAsString(new Trajectory(tasks, new RobotConfiguration(
+            5, 5, 
+            new TankMotionProfile.TankMotionProfileConstraints(1, 1)
+        )));
         System.out.println(t);
     }
 }
