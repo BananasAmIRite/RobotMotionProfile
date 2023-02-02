@@ -1,5 +1,10 @@
 package org.bananasamirite.robotmotionprofile.data.waypoint; 
 
+import org.bananasamirite.robotmotionprofile.Waypoint;
+import org.bananasamirite.robotmotionprofile.TankMotionProfile;
+
+import java.util.*; 
+
 public class CommandWaypoint extends Waypoint {
     private String commandName;
     private List<Object> parameters;
