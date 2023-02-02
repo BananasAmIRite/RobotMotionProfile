@@ -76,15 +76,15 @@ public class Trajectory {
 
     public static Trajectory fromWaypoint(List<Waypoint> waypoints, RobotConfiguration config) {
         List<TrajectoryTask> tasks = new ArrayList<>(); 
-        List<Waypoint> currentSplinePoints = new ArrayList<>(); 
+        List<SplineWaypoint> currentSplinePoints = new ArrayList<>(); 
         for (Waypoint w : waypoints) {
             if (w instanceof CommandWaypoint) {
                 WaypointTask t = new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints()); 
                 tasks.add(t); 
-                tasks.add(new CommandTask(w)); 
+                tasks.add(new CommandTask((CommandWaypoint) w)); 
                 currentSplinePoints = new ArrayList<>(); 
-            } else {
-                currentSplinePoints.add(w); 
+            } else if (w instanceof SplineWaypoint) {
+                currentSplinePoints.add((SplineWaypoint) w); 
             }
         }
         if (currentSplinePoints.size() != 0) tasks.add(new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints())); 
