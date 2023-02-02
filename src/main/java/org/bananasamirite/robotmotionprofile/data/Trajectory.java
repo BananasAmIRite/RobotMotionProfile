@@ -89,7 +89,7 @@ public class Trajectory {
             }
         }
         if (currentSplinePoints.size() != 0) tasks.add(new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints())); 
-        return new Trajectory(waypoints, tasks); 
+        return new Trajectory(waypoints, tasks, config); 
     }
 
     // TODO: remove testing; this just for reference rn
