@@ -42,7 +42,8 @@ public class Trajectory {
 
     public Trajectory() {}
 
-    public Trajectory(List<TrajectoryTask> tasks, RobotConfiguration config) {
+    public Trajectory(List<Waypoint> waypoints, List<TrajectoryTask> tasks, RobotConfiguration config) {
+        this.waypoints = waypoints; 
         this.tasks = tasks;
     }
 
@@ -88,6 +89,7 @@ public class Trajectory {
             }
         }
         if (currentSplinePoints.size() != 0) tasks.add(new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints())); 
+        return new Trajectory(waypoints, tasks); 
     }
 
     // TODO: remove testing; this just for reference rn
