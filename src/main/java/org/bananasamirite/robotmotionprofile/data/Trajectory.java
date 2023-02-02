@@ -92,17 +92,17 @@ public class Trajectory {
 
     // TODO: remove testing; this just for reference rn
     public static void main(String[] args) throws JsonProcessingException {
-        List<TrajectoryTask> tasks = new ArrayList<>();
-        tasks.add(new CommandTask("testCommand", "a", 1.0, 2));
-        List<Waypoint> waypoints = List.of(new Waypoint(0, 0, 0, 1, 1), new Waypoint(1, 1, Math.toRadians(90), 1, 1));
-        TankMotionProfile.TankMotionProfileConstraints constraints = new TankMotionProfile.TankMotionProfileConstraints(1, 1);
-        TankMotionProfile p = new TankMotionProfile(ParametricSpline.fromWaypoints(waypoints), TankMotionProfile.ProfileMethod.TIME, constraints);
-        tasks.add(new WaypointTask(waypoints, TankMotionProfile.ProfileMethod.TIME, constraints));
-        tasks.add(new GeneratedWaypointTask(waypoints, TankMotionProfile.ProfileMethod.TIME, constraints, p.getNodes()));
-        String t = mapper.writeValueAsString(new Trajectory(tasks, new RobotConfiguration(
-            5, 5, 
-            new TankMotionProfile.TankMotionProfileConstraints(1, 1)
-        )));
-        System.out.println(t);
+        // List<TrajectoryTask> tasks = new ArrayList<>();
+        // tasks.add(new CommandTask("testCommand", "a", 1.0, 2));
+        // List<Waypoint> waypoints = List.of(new Waypoint(0, 0, 0, 1, 1), new Waypoint(1, 1, Math.toRadians(90), 1, 1));
+        // TankMotionProfile.TankMotionProfileConstraints constraints = new TankMotionProfile.TankMotionProfileConstraints(1, 1);
+        // TankMotionProfile p = new TankMotionProfile(ParametricSpline.fromWaypoints(waypoints), TankMotionProfile.ProfileMethod.TIME, constraints);
+        // tasks.add(new WaypointTask(waypoints, TankMotionProfile.ProfileMethod.TIME, constraints));
+        // tasks.add(new GeneratedWaypointTask(waypoints, TankMotionProfile.ProfileMethod.TIME, constraints, p.getNodes()));
+        // String t = mapper.writeValueAsString(new Trajectory(tasks, new RobotConfiguration(
+        //     5, 5, 
+        //     new TankMotionProfile.TankMotionProfileConstraints(1, 1)
+        // )));
+        // System.out.println(t);
     }
 }
