@@ -7,10 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bananasamirite.robotmotionprofile.ParametricSpline;
 import org.bananasamirite.robotmotionprofile.TankMotionProfile;
 import org.bananasamirite.robotmotionprofile.Waypoint;
+import org.bananasamirite.robotmotionprofile.TankMotionProfile.ProfileMethod;
 import org.bananasamirite.robotmotionprofile.data.task.CommandTask;
 import org.bananasamirite.robotmotionprofile.data.task.GeneratedWaypointTask;
 import org.bananasamirite.robotmotionprofile.data.task.TrajectoryTask;
 import org.bananasamirite.robotmotionprofile.data.task.WaypointTask;
+import org.bananasamirite.robotmotionprofile.data.waypoint.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +30,13 @@ public class Trajectory {
             @JsonSubTypes.Type(value = GeneratedWaypointTask.class, name = "GENERATED_PATH")
     })
     private List<TrajectoryTask> tasks;
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+            property = "type") @JsonSubTypes({
+            @JsonSubTypes.Type(value = CommandWaypoint.class, name = "COMMAND"),
+            @JsonSubTypes.Type(value = SplineWaypoint.class, name = "SPLINE"),
+    })
+    private List<Waypoint> waypoints; 
 
     private RobotConfiguration config; 
 
@@ -53,8 +62,32 @@ public class Trajectory {
         this.config = config; 
     }
 
+    public List<Waypoint> getWaypoints() {
+        return this.waypoints; 
+    }
+
+    public void setWaypoints(List<Waypoint> waypoints) {
+        this.waypoints = waypoints; 
+    }
+
     public static Trajectory fromFile(File file) throws IOException {
         return mapper.readValue(file, Trajectory.class);
+    }
+
+    public static Trajectory fromWaypoint(List<Waypoint> waypoints, RobotConfiguration config) {
+        List<TrajectoryTask> tasks = new ArrayList<>(); 
+        List<Waypoint> currentSplinePoints = new ArrayList<>(); 
+        for (Waypoint w : waypoints) {
+            if (w instanceof CommandWaypoint) {
+                WaypointTask t = new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints()); 
+                tasks.add(t); 
+                tasks.add(new CommandTask(w)); 
+                currentSplinePoints = new ArrayList<>(); 
+            } else {
+                currentSplinePoints.add(w); 
+            }
+        }
+        if (currentSplinePoints.size() != 0) tasks.add(new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints())); 
     }
 
     // TODO: remove testing; this just for reference rn

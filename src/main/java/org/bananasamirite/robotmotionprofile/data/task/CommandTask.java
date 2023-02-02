@@ -3,30 +3,18 @@ package org.bananasamirite.robotmotionprofile.data.task;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bananasamirite.robotmotionprofile.data.waypoint.CommandWaypoint;
+
 public class CommandTask extends TrajectoryTask {
-    private String name;
-    private List<Object> parameters;
+    private CommandWaypoint waypoint; 
 
     public CommandTask() {}
 
-    public CommandTask(String name, Object... parameters) {
-        this.name = name;
-        this.parameters = Arrays.asList(parameters);
+    public void setWaypoint(CommandWaypoint waypoint) {
+        this.waypoint = waypoint; 
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<Object> getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(List<Object> parameters) {
-        this.parameters = parameters;
+    public CommandWaypoint getWaypoint() {
+        return this.waypoint; 
     }
 }
