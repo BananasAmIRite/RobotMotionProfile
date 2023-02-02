@@ -12,7 +12,7 @@ public class CommandWaypoint extends Waypoint {
     public CommandWaypoint() {}
 
     public CommandWaypoint(double x, double y, double angle, double weight, double runTime, String commandName, Object... parameters) {
-        this(x, y, angle, weight, runTime, new TankMotionProfile.TankMotionProfileConstraints(0, 0), command, parameters); 
+        this(x, y, angle, weight, runTime, new TankMotionProfile.TankMotionProfileConstraints(0, 0), commandName, parameters); 
     }
 
     public CommandWaypoint(double x, double y, double angle, double weight, double runTime, TankMotionProfile.TankMotionProfileConstraints constraints, String commandName, Object... parameters) {

@@ -10,6 +10,10 @@ public class CommandTask extends TrajectoryTask {
 
     public CommandTask() {}
 
+    public CommandTask(CommandWaypoint waypoint) {
+        this.waypoint = waypoint; 
+    }
+
     public void setWaypoint(CommandWaypoint waypoint) {
         this.waypoint = waypoint; 
     }
