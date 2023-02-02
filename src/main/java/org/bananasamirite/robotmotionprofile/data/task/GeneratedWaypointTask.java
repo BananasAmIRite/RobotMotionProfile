@@ -1,7 +1,7 @@
 package org.bananasamirite.robotmotionprofile.data.task;
 
 import org.bananasamirite.robotmotionprofile.TankMotionProfile;
-import org.bananasamirite.robotmotionprofile.Waypoint;
+import org.bananasamirite.robotmotionprofile.data.waypoint.SplineWaypoint;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ public class GeneratedWaypointTask extends WaypointTask {
 
     public GeneratedWaypointTask() {}
 
-    public GeneratedWaypointTask(List<Waypoint> waypoints, TankMotionProfile.ProfileMethod method, TankMotionProfile.TankMotionProfileConstraints constraints, List<TankMotionProfile.MotionProfileNode> nodes) {
+    public GeneratedWaypointTask(List<SplineWaypoint> waypoints, TankMotionProfile.ProfileMethod method, TankMotionProfile.TankMotionProfileConstraints constraints, List<TankMotionProfile.MotionProfileNode> nodes) {
         super(waypoints, method, constraints);
         this.nodes = nodes;
     }
