@@ -1,6 +1,8 @@
 package org.bananasamirite.robotmotionprofile;
 
 public class Waypoint {
+
+    protected String name;
     protected double runTime;
     protected double x;
     protected double y;
@@ -15,12 +17,17 @@ public class Waypoint {
     }
 
     public Waypoint(double x, double y, double angle, double weight, double runTime, TankMotionProfile.TankMotionProfileConstraints constraints) {
+        this("", x, y, angle, weight, runTime, constraints);
+    }
+
+    public Waypoint(String name, double x, double y, double angle, double weight, double runTime, TankMotionProfile.TankMotionProfileConstraints constraints) {
         this.x = x;
         this.y = y;
         this.angle = angle;
         this.weight = weight;
         this.runTime = runTime;
-        this.constraints = constraints; 
+        this.constraints = constraints;
+        this.name = name;
     }
 
     public double getX() {
@@ -41,6 +48,10 @@ public class Waypoint {
 
     public double getRunTime() {
         return runTime;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public TankMotionProfile.TankMotionProfileConstraints getConstraints() {
@@ -69,5 +80,9 @@ public class Waypoint {
 
     public void setWeight(double weight) {
         this.weight = weight;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

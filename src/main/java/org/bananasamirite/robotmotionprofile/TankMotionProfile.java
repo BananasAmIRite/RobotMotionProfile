@@ -316,6 +316,15 @@ public class TankMotionProfile {
         public double getAcceleration() {
             return acceleration;
         }
+
+        @Override
+        public String toString() {
+            return "MotionProfileState{" +
+                    "velocity=" + velocity +
+                    ", pose=" + pose +
+                    ", acceleration=" + acceleration +
+                    '}';
+        }
     }
 
     public static class MotionProfileNode {
