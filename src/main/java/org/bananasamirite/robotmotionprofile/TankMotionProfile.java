@@ -433,6 +433,7 @@ public class TankMotionProfile {
         private double maxVelocity;
         private double maxAcceleration;
 
+        public TankMotionProfileConstraints() {}
         public TankMotionProfileConstraints(double maxVel, double maxAccel) {
             this.maxVelocity = maxVel;
             this.maxAcceleration = maxAccel;
