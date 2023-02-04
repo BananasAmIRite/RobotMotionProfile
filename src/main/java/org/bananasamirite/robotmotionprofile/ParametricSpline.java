@@ -76,6 +76,10 @@ public class ParametricSpline {
         return 1/signedCurvatureAt(time);
     }
 
+    public Waypoint getLastWaypointAtTime(double time) {
+        return getPathAtTime(time).getPath().getStartPoint();
+    }
+
     public static ParametricSpline fromWaypoints(Waypoint[] waypoints) {
         return fromWaypoints(Arrays.stream(waypoints).collect(Collectors.toList()));
     }

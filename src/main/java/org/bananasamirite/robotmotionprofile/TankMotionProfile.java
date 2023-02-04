@@ -37,6 +37,10 @@ public class TankMotionProfile {
 
             for (double i = timeSize; i < spline.getTotalTime(); i += timeSize) {
 
+                TankMotionProfile.TankMotionProfileConstraints pointConstraints = spline.getLastWaypointAtTime(i).getConstraints();
+
+                TankMotionProfile.TankMotionProfileConstraints finalConstraint = pointConstraints.getMaxAcceleration() == 0 ? constraints : pointConstraints;
+
                 double nodeLength = Math.sqrt(
                         Math.pow(spline.getYAtTime(i) - spline.getYAtTime(i-timeSize), 2) +
                                 Math.pow(spline.getXAtTime(i) - spline.getXAtTime(i-timeSize), 2)
@@ -47,9 +51,9 @@ public class TankMotionProfile {
 
                 // vf^2 = v0^2+2ad
 
-                double newLinearVelocity = Math.sqrt(Math.pow(lastNode.velocity, 2) + 2 * constraints.maxAcceleration * nodeLength);
-                double angularVelocity = constraints.maxVelocity / (Math.abs(radius) + 1);
-                double maxLinearVelocity = constraints.maxVelocity - angularVelocity;
+                double newLinearVelocity = Math.sqrt(Math.pow(lastNode.velocity, 2) + 2 * finalConstraint.maxAcceleration * nodeLength);
+                double angularVelocity = finalConstraint.maxVelocity / (Math.abs(radius) + 1);
+                double maxLinearVelocity = finalConstraint.maxVelocity - angularVelocity;
                 newLinearVelocity = Math.min(newLinearVelocity, maxLinearVelocity);
 
                 MotionProfileNode node = new MotionProfileNode(newLinearVelocity, 0, new Position(
@@ -316,6 +320,15 @@ public class TankMotionProfile {
         public double getAcceleration() {
             return acceleration;
         }
+
+        @Override
+        public String toString() {
+            return "MotionProfileState{" +
+                    "velocity=" + velocity +
+                    ", pose=" + pose +
+                    ", acceleration=" + acceleration +
+                    '}';
+        }
     }
 
     public static class MotionProfileNode {
@@ -420,6 +433,7 @@ public class TankMotionProfile {
         private double maxVelocity;
         private double maxAcceleration;
 
+        public TankMotionProfileConstraints() {}
         public TankMotionProfileConstraints(double maxVel, double maxAccel) {
             this.maxVelocity = maxVel;
             this.maxAcceleration = maxAccel;
