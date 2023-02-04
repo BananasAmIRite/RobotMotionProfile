@@ -80,6 +80,7 @@ public class Trajectory {
         List<Waypoint> currentSplinePoints = new ArrayList<>(); 
         for (Waypoint w : waypoints) {
             if (w instanceof CommandWaypoint) {
+                currentSplinePoints.add(w);
                 WaypointTask t = new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints()); 
                 tasks.add(t); 
                 tasks.add(new CommandTask((CommandWaypoint) w)); 
