@@ -3,6 +3,7 @@ package org.bananasamirite.robotmotionprofile.data;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bananasamirite.robotmotionprofile.Waypoint;
 import org.bananasamirite.robotmotionprofile.TankMotionProfile.ProfileMethod;
@@ -19,6 +20,10 @@ import java.util.List;
 
 public class Trajectory {
     private static final ObjectMapper mapper = new ObjectMapper();
+
+    static {
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
             property = "type") @JsonSubTypes({
