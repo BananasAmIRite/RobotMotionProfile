@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bananasamirite.robotmotionprofile.ParametricSpline;
-import org.bananasamirite.robotmotionprofile.TankMotionProfile;
 import org.bananasamirite.robotmotionprofile.Waypoint;
 import org.bananasamirite.robotmotionprofile.TankMotionProfile.ProfileMethod;
 import org.bananasamirite.robotmotionprofile.data.task.CommandTask;
@@ -45,6 +43,7 @@ public class Trajectory {
     public Trajectory(List<Waypoint> waypoints, List<TrajectoryTask> tasks, RobotConfiguration config) {
         this.waypoints = waypoints; 
         this.tasks = tasks;
+        this.config = config;
     }
 
     public List<TrajectoryTask> getTasks() {
@@ -91,6 +90,14 @@ public class Trajectory {
         }
         if (currentSplinePoints.size() != 0) tasks.add(new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints())); 
         return new Trajectory(waypoints, tasks, config); 
+    }
+
+    public String toJsonString() throws JsonProcessingException {
+        return mapper.writeValueAsString(this);
+    }
+
+    public void toJsonFile(File f) throws IOException {
+        mapper.writeValue(f, this);
     }
 
     // TODO: remove testing; this just for reference rn
