@@ -115,6 +115,7 @@ public class TankMotionProfile {
             for (MotionProfileNode n : nodes) {
                 n.acceleration *= -1;
                 n.velocity *= -1;
+                n.pose.setRotation(Math.atan2(Math.sin(n.pose.getRotation() + Math.PI), Math.cos(n.pose.getRotation() + Math.PI)));
             }
         }
 
@@ -200,6 +201,7 @@ public class TankMotionProfile {
             for (MotionProfileNode n : nodes) {
                 n.acceleration *= -1;
                 n.velocity *= -1;
+                n.pose.setRotation(Math.atan2(Math.sin(n.pose.getRotation() + Math.PI), Math.cos(n.pose.getRotation() + Math.PI)));
             }
         }
 
