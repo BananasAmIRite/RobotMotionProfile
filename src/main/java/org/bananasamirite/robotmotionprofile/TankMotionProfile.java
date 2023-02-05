@@ -116,6 +116,8 @@ public class TankMotionProfile {
                 n.acceleration *= -1;
                 n.velocity *= -1;
                 n.pose.setRotation(Math.atan2(Math.sin(n.pose.getRotation() + Math.PI), Math.cos(n.pose.getRotation() + Math.PI)));
+                n.pose.setX(-n.pose.getX());
+                n.pose.setY(-n.pose.getY());
             }
         }
 
