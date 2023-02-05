@@ -10,15 +10,19 @@ public class TankMotionProfile {
     private ParametricSpline spline;
 
     public TankMotionProfile(ParametricSpline spline, ProfileMethod type, TankMotionProfileConstraints constraints) {
+        this(spline, type, constraints, ProfileDirection.FORWARD);
+    }
+
+    public TankMotionProfile(ParametricSpline spline, ProfileMethod type, TankMotionProfileConstraints constraints, ProfileDirection direction) {
         this.spline = spline;
-        this.nodes = type == ProfileMethod.DISTANCE ? calculateDistanceMotionProfile(spline, constraints, 1E-3) : calculateTimeMotionProfile(spline, constraints, 1E-3);
+        this.nodes = type == ProfileMethod.DISTANCE ? calculateDistanceMotionProfile(spline, constraints, direction, 1E-3) : calculateTimeMotionProfile(spline, constraints, direction, 1E-3);
     }
 
     public TankMotionProfile(List<MotionProfileNode> nodes) {
         this.nodes = nodes;
     }
 
-    private List<MotionProfileNode> calculateTimeMotionProfile(ParametricSpline spline, TankMotionProfileConstraints constraints, double timeSize) {
+    private List<MotionProfileNode> calculateTimeMotionProfile(ParametricSpline spline, TankMotionProfileConstraints constraints, ProfileDirection direction, double timeSize) {
         List<MotionProfileNode> nodes = new ArrayList<>();
 
         {
@@ -107,12 +111,19 @@ public class TankMotionProfile {
             totalTime += n.time;
         }
 
+        if (direction == ProfileDirection.BACKWARD) {
+            for (MotionProfileNode n : nodes) {
+                n.acceleration *= -1;
+                n.velocity *= -1;
+            }
+        }
+
         return nodes;
     }
 
     // TODO: offload most of the computations to preprocessing somewhere else (maybe points creator program)
     // TODO: gotta apply voltage constraints as well maybe
-    private List<MotionProfileNode> calculateDistanceMotionProfile(ParametricSpline spline, TankMotionProfileConstraints constraints, double nodeLength) {
+    private List<MotionProfileNode> calculateDistanceMotionProfile(ParametricSpline spline, TankMotionProfileConstraints constraints, ProfileDirection direction, double nodeLength) {
         List<MotionProfileNode> nodes = new ArrayList<>();
 
         {
@@ -183,6 +194,13 @@ public class TankMotionProfile {
 
             nextNode.totalTime = totalTime + n.time;
             totalTime += n.time;
+        }
+
+        if (direction == ProfileDirection.BACKWARD) {
+            for (MotionProfileNode n : nodes) {
+                n.acceleration *= -1;
+                n.velocity *= -1;
+            }
         }
 
         return nodes;
@@ -459,5 +477,10 @@ public class TankMotionProfile {
     public enum ProfileMethod {
         DISTANCE, 
         TIME
+    }
+
+    public enum ProfileDirection {
+        FORWARD,
+        BACKWARD
     }
 }
