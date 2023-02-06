@@ -12,13 +12,15 @@ public class WaypointTask extends TrajectoryTask {
     private List<Waypoint> waypoints = new ArrayList<>();
     private TankMotionProfile.ProfileMethod method;
     private TankMotionProfile.TankMotionProfileConstraints constraints;
+    private boolean reversed; 
 
     public WaypointTask() {}
 
-    public WaypointTask(List<Waypoint> waypoints, TankMotionProfile.ProfileMethod method, TankMotionProfile.TankMotionProfileConstraints constraints) {
+    public WaypointTask(List<Waypoint> waypoints, TankMotionProfile.ProfileMethod method, TankMotionProfile.TankMotionProfileConstraints constraints, boolean reversed) {
         this.waypoints = waypoints;
         this.method = method;
         this.constraints = constraints;
+        this.reversed = reversed;
     }
 
     public List<Waypoint> getWaypoints() {
@@ -46,6 +48,6 @@ public class WaypointTask extends TrajectoryTask {
     }
 
     public TankMotionProfile createProfile() {
-        return new TankMotionProfile(ParametricSpline.fromWaypoints(waypoints), method, constraints);
+        return new TankMotionProfile(ParametricSpline.fromWaypoints(waypoints, reversed), method, constraints);
     }
 }

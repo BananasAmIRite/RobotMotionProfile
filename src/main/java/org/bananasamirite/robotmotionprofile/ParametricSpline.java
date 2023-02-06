@@ -2,15 +2,20 @@ package org.bananasamirite.robotmotionprofile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ParametricSpline {
 
     private final List<TimedPath> paths;
+    private final double totalTime; 
+    private final boolean reversed; 
 
-    private ParametricSpline(List<TimedPath> paths) {
+    private ParametricSpline(List<TimedPath> paths, boolean reversed) {
         this.paths = paths;
+        this.reversed = reversed; 
+        this.totalTime = this.paths.stream().reduce(0d, (partial, path) -> partial + path.getPath().getRunTime(), Double::sum);
     }
 
     public double getTotalLength() {
@@ -26,10 +31,11 @@ public class ParametricSpline {
     }
 
     public double getTotalTime() {
-        return this.paths.stream().reduce(0d, (partial, path) -> partial + path.getPath().getRunTime(), Double::sum);
+        return totalTime; 
     }
 
     private TimedPath getPathAtTime(double time) {
+        if (reversed) time = this.totalTime - time; 
         double totalTime = 0;
         for (TimedPath p : paths) {
             totalTime += p.getPath().getRunTime();
@@ -80,18 +86,32 @@ public class ParametricSpline {
         return getPathAtTime(time).getPath().getStartPoint();
     }
 
+    public boolean isReversed() {
+        return reversed; 
+    }
+
     public static ParametricSpline fromWaypoints(Waypoint[] waypoints) {
-        return fromWaypoints(Arrays.stream(waypoints).collect(Collectors.toList()));
+        return fromWaypoints(waypoints, false); 
     }
 
     public static ParametricSpline fromWaypoints(List<Waypoint> waypoints) {
-        List<TimedPath> paths = new ArrayList<>();
+        return fromWaypoints(waypoints, false); 
+    }
+
+    public static ParametricSpline fromWaypoints(Waypoint[] waypoints, boolean reversed) {
+        return fromWaypoints(Arrays.stream(waypoints).collect(Collectors.toList()));
+    }
+
+    public static ParametricSpline fromWaypoints(List<Waypoint> waypoints, boolean reversed) {
+        List<TimedPath> paths = new ArrayList<>(); 
+        waypoints = new ArrayList<>(waypoints);
+        if (reversed) Collections.reverse(waypoints);
         double timeSoFar = 0;
         for (int i = 0; i < waypoints.size() - 1; i++) {
             Path p = new Path(waypoints.get(i), waypoints.get(i+1));
             paths.add(new TimedPath(p, timeSoFar));
             timeSoFar += p.getRunTime();
         }
-        return new ParametricSpline(paths);
+        return new ParametricSpline(paths, reversed);
     }
 }

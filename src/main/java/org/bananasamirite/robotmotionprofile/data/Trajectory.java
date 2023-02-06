@@ -82,20 +82,20 @@ public class Trajectory {
     public static Trajectory fromWaypoint(List<Waypoint> waypoints, RobotConfiguration config) {
         List<TrajectoryTask> tasks = new ArrayList<>(); 
         List<Waypoint> currentSplinePoints = new ArrayList<>(); 
-        for (Waypoint w : waypoints) {
-            if (w instanceof CommandWaypoint) {
-                if (!currentSplinePoints.isEmpty()) {
-                    currentSplinePoints.add(w);
-                    WaypointTask t = new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints());
-                    tasks.add(t);
-                    currentSplinePoints = new ArrayList<>();
-                }
-                tasks.add(new CommandTask((CommandWaypoint) w));
-            } else if (w instanceof SplineWaypoint) {
-                currentSplinePoints.add(w); 
+        for (Waypoint currentWaypoint : waypoints) {
+            if (currentSplinePoints.size() != 0 && (currentWaypoint instanceof CommandWaypoint || 
+            ((SplineWaypoint) currentSplinePoints.get(0)).isReversed() != ((SplineWaypoint) currentWaypoint).isReversed())) {
+                currentSplinePoints.add(currentWaypoint); 
+                // unfill the list into a spline
+                WaypointTask t = new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints(), ((SplineWaypoint) currentSplinePoints.get(0)).isReversed()); 
+                tasks.add(t); 
+                currentSplinePoints = new ArrayList<>(); 
             }
+
+            if (currentWaypoint instanceof CommandWaypoint) tasks.add(new CommandTask((CommandWaypoint) currentWaypoint)); 
+            if (currentWaypoint instanceof SplineWaypoint) currentSplinePoints.add(currentWaypoint); 
         }
-        if (currentSplinePoints.size() != 0) tasks.add(new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints())); 
+        if (currentSplinePoints.size() != 0) tasks.add(new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints(), ((SplineWaypoint) currentSplinePoints.get(0)).isReversed())); 
         return new Trajectory(waypoints, tasks, config); 
     }
 
