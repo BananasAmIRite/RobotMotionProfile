@@ -35,7 +35,6 @@ public class ParametricSpline {
     }
 
     private TimedPath getPathAtTime(double time) {
-        if (reversed) time = this.totalTime - time; 
         double totalTime = 0;
         for (TimedPath p : paths) {
             totalTime += p.getPath().getRunTime();
@@ -45,36 +44,43 @@ public class ParametricSpline {
     }
 
     public double getXAtTime(double time) {
+        if (reversed) time = this.totalTime - time;
         TimedPath path = getPathAtTime(time);
         return path.getPath().getXAt(time - path.getStartTime());
     }
 
     public double getYAtTime(double time) {
+        if (reversed) time = this.totalTime - time;
         TimedPath path = getPathAtTime(time);
         return path.getPath().getYAt(time - path.getStartTime());
     }
 
     public double getDxAtTime(double time) {
+        if (reversed) time = this.totalTime - time;
         TimedPath path = getPathAtTime(time);
         return path.getPath().getDxAt(time - path.getStartTime());
     }
 
     public double getDyAtTime(double time) {
+        if (reversed) time = this.totalTime - time;
         TimedPath path = getPathAtTime(time);
         return path.getPath().getDyAt(time - path.getStartTime());
     }
 
     public double getDdxAtTime(double time) {
+        if (reversed) time = this.totalTime - time;
         TimedPath path = getPathAtTime(time);
         return path.getPath().getDdxAt(time - path.getStartTime());
     }
 
     public double getDdyAtTime(double time) {
+        if (reversed) time = this.totalTime - time;
         TimedPath path = getPathAtTime(time);
         return path.getPath().getDdyAt(time - path.getStartTime());
     }
 
     public double signedCurvatureAt(double time) {
+        if (reversed) time = this.totalTime - time;
         return (getDxAtTime(time) * getDdyAtTime(time) + getDyAtTime(time) * getDdxAtTime(time)) / Math.pow(Math.pow(getDxAtTime(time), 2) + Math.pow(getDyAtTime(time), 2), 3.0/2);
     }
 
@@ -83,7 +89,8 @@ public class ParametricSpline {
     }
 
     public Waypoint getLastWaypointAtTime(double time) {
-        return getPathAtTime(time).getPath().getStartPoint();
+        if (reversed) time = this.totalTime - time;
+        return reversed ? getPathAtTime(time).getPath().getEndPoint() : getPathAtTime(time).getPath().getStartPoint();
     }
 
     public boolean isReversed() {
@@ -99,7 +106,7 @@ public class ParametricSpline {
     }
 
     public static ParametricSpline fromWaypoints(Waypoint[] waypoints, boolean reversed) {
-        return fromWaypoints(Arrays.stream(waypoints).collect(Collectors.toList()));
+        return fromWaypoints(Arrays.stream(waypoints).collect(Collectors.toList()), reversed);
     }
 
     public static ParametricSpline fromWaypoints(List<Waypoint> waypoints, boolean reversed) {
