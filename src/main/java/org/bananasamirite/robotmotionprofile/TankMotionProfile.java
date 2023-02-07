@@ -107,12 +107,12 @@ public class TankMotionProfile {
             totalTime += n.time;
         }
 
-//        if (spline.isReversed()) {
-//            for (MotionProfileNode n : nodes) {
-//                n.acceleration *= -1;
-//                n.velocity *= -1;
-//            }
-//        }
+        if (spline.isReversed()) {
+            for (MotionProfileNode n : nodes) {
+                n.acceleration *= -1;
+                n.velocity *= -1;
+            }
+        }
 
         return nodes;
     }
