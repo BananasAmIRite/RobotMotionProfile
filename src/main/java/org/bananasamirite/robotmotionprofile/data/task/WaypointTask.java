@@ -47,7 +47,11 @@ public class WaypointTask extends TrajectoryTask {
         this.method = method;
     }
 
+    public ParametricSpline getSpline() {
+        return ParametricSpline.fromWaypoints(waypoints, reversed);
+    }
+
     public TankMotionProfile createProfile() {
-        return new TankMotionProfile(ParametricSpline.fromWaypoints(waypoints, reversed), method, constraints);
+        return new TankMotionProfile(getSpline(), method, constraints);
     }
 }
