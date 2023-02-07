@@ -280,7 +280,9 @@ public class TankMotionProfile {
                         node.velocity + node.acceleration * dt,
                         dt,
                         time,
-                        new Position(node.pose.getX() + dx, node.pose.getY() + dy, Math.atan2(vy, vx)),
+                        new Position(node.pose.getX() + dx, node.pose.getY() + dy,
+                                Math.atan2(vy, vx) + (this.spline.isReversed() ? Math.PI : 0) // if the direction is reversed, the robot's heading will be 180 degrees the robot's velocity vector
+                        ),
                         (vx*ay-vy*ax)/Math.pow(vx*vx+vy*vy, 3/2.0),
                         node.acceleration
                 );

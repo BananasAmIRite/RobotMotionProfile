@@ -8,7 +8,7 @@ public class Position {
     public Position(double x, double y, double rotation) {
         this.x = x;
         this.y = y;
-        this.rotation = rotation;
+        this.rotation = Math.atan2(Math.sin(rotation), Math.cos(rotation));
     }
 
     public double getX() {
