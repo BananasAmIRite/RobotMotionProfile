@@ -12,8 +12,8 @@ public class GeneratedWaypointTask extends WaypointTask {
 
     public GeneratedWaypointTask() {}
 
-    public GeneratedWaypointTask(List<Waypoint> waypoints, TankMotionProfile.ProfileMethod method, TankMotionProfile.TankMotionProfileConstraints constraints, List<TankMotionProfile.MotionProfileNode> nodes) {
-        super(waypoints, method, constraints);
+    public GeneratedWaypointTask(List<Waypoint> waypoints, TankMotionProfile.ProfileMethod method, TankMotionProfile.TankMotionProfileConstraints constraints, List<TankMotionProfile.MotionProfileNode> nodes, boolean reversed) {
+        super(waypoints, method, constraints, reversed);
         this.nodes = nodes;
     }
 

@@ -79,23 +79,30 @@ public class Trajectory {
         return mapper.readValue(file, Trajectory.class);
     }
 
+    // TODO: phase out legacy system in favor of JUST parsing every time cuz its better
+    public static Trajectory parseFromFile(File file) throws IOException {
+        Trajectory trajectory = fromFile(file);
+        return fromWaypoint(trajectory.waypoints, trajectory.config);
+    }
+
     public static Trajectory fromWaypoint(List<Waypoint> waypoints, RobotConfiguration config) {
         List<TrajectoryTask> tasks = new ArrayList<>(); 
         List<Waypoint> currentSplinePoints = new ArrayList<>(); 
-        for (Waypoint w : waypoints) {
-            if (w instanceof CommandWaypoint) {
-                if (!currentSplinePoints.isEmpty()) {
-                    currentSplinePoints.add(w);
-                    WaypointTask t = new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints());
-                    tasks.add(t);
-                    currentSplinePoints = new ArrayList<>();
-                }
-                tasks.add(new CommandTask((CommandWaypoint) w));
-            } else if (w instanceof SplineWaypoint) {
-                currentSplinePoints.add(w); 
+        for (Waypoint currentWaypoint : waypoints) {
+            System.out.println(currentWaypoint);
+            if (currentSplinePoints.size() != 0 && (currentWaypoint instanceof CommandWaypoint || 
+            ((SplineWaypoint) currentSplinePoints.get(0)).isReversed() != ((SplineWaypoint) currentWaypoint).isReversed())) {
+                currentSplinePoints.add(currentWaypoint); 
+                // unfill the list into a spline
+                WaypointTask t = new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints(), ((SplineWaypoint) currentSplinePoints.get(0)).isReversed()); 
+                tasks.add(t); 
+                currentSplinePoints = new ArrayList<>(); 
             }
+
+            if (currentWaypoint instanceof CommandWaypoint) tasks.add(new CommandTask((CommandWaypoint) currentWaypoint)); 
+            if (currentWaypoint instanceof SplineWaypoint) currentSplinePoints.add(currentWaypoint); 
         }
-        if (currentSplinePoints.size() != 0) tasks.add(new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints())); 
+        if (currentSplinePoints.size() != 0) tasks.add(new WaypointTask(currentSplinePoints, ProfileMethod.TIME, config.getConstraints(), ((SplineWaypoint) currentSplinePoints.get(0)).isReversed())); 
         return new Trajectory(waypoints, tasks, config); 
     }
 
@@ -105,21 +112,5 @@ public class Trajectory {
 
     public void toJsonFile(File f) throws IOException {
         mapper.writeValue(f, this);
-    }
-
-    // TODO: remove testing; this just for reference rn
-    public static void main(String[] args) throws JsonProcessingException {
-        // List<TrajectoryTask> tasks = new ArrayList<>();
-        // tasks.add(new CommandTask("testCommand", "a", 1.0, 2));
-        // List<Waypoint> waypoints = List.of(new Waypoint(0, 0, 0, 1, 1), new Waypoint(1, 1, Math.toRadians(90), 1, 1));
-        // TankMotionProfile.TankMotionProfileConstraints constraints = new TankMotionProfile.TankMotionProfileConstraints(1, 1);
-        // TankMotionProfile p = new TankMotionProfile(ParametricSpline.fromWaypoints(waypoints), TankMotionProfile.ProfileMethod.TIME, constraints);
-        // tasks.add(new WaypointTask(waypoints, TankMotionProfile.ProfileMethod.TIME, constraints));
-        // tasks.add(new GeneratedWaypointTask(waypoints, TankMotionProfile.ProfileMethod.TIME, constraints, p.getNodes()));
-        // String t = mapper.writeValueAsString(new Trajectory(tasks, new RobotConfiguration(
-        //     5, 5, 
-        //     new TankMotionProfile.TankMotionProfileConstraints(1, 1)
-        // )));
-        // System.out.println(t);
     }
 }
