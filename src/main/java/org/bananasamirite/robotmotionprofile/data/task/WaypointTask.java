@@ -30,6 +30,7 @@ public class WaypointTask extends TrajectoryTask {
         this.method = method;
         this.constraints = constraints;
         this.reversed = reversed;
+        System.out.println(reversed);
     }
 
     public List<Waypoint> getWaypoints() {
@@ -58,6 +59,14 @@ public class WaypointTask extends TrajectoryTask {
 
     public ParametricSpline getSpline() {
         return ParametricSpline.fromWaypoints(waypoints, reversed);
+    }
+
+    public boolean getReversed() {
+        return reversed;
+    }
+
+    public void setReversed(boolean reversed) {
+        this.reversed = reversed;
     }
 
     public TankMotionProfile createProfile() {
