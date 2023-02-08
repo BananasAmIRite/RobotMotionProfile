@@ -108,7 +108,7 @@ public class Trajectory {
     }
 
     // TODO: remove testing; this just for reference rn
-    public static void main(String[] args) throws JsonProcessingException {
+    public static void main(String[] args) {
         // List<TrajectoryTask> tasks = new ArrayList<>();
         // tasks.add(new CommandTask("testCommand", "a", 1.0, 2));
         // List<Waypoint> waypoints = List.of(new Waypoint(0, 0, 0, 1, 1), new Waypoint(1, 1, Math.toRadians(90), 1, 1));

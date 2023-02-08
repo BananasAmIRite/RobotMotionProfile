@@ -1,14 +1,23 @@
 package org.bananasamirite.robotmotionprofile.data.task;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.bananasamirite.robotmotionprofile.ParametricSpline;
 import org.bananasamirite.robotmotionprofile.TankMotionProfile;
 import org.bananasamirite.robotmotionprofile.Waypoint;
+import org.bananasamirite.robotmotionprofile.data.waypoint.CommandWaypoint;
+import org.bananasamirite.robotmotionprofile.data.waypoint.SplineWaypoint;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class WaypointTask extends TrajectoryTask {
 
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+            property = "type") @JsonSubTypes({
+            @JsonSubTypes.Type(value = CommandWaypoint.class, name = "COMMAND"),
+            @JsonSubTypes.Type(value = SplineWaypoint.class, name = "SPLINE"),
+    })
     private List<Waypoint> waypoints = new ArrayList<>();
     private TankMotionProfile.ProfileMethod method;
     private TankMotionProfile.TankMotionProfileConstraints constraints;
