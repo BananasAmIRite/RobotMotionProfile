@@ -52,7 +52,8 @@ public class TankMotionProfile {
                 // vf^2 = v0^2+2ad
 
                 double newLinearVelocity = Math.sqrt(Math.pow(lastNode.velocity, 2) + 2 * finalConstraint.maxAcceleration * nodeLength);
-                double angularVelocity = finalConstraint.maxVelocity / (Math.abs(radius) + 1);
+//                double angularVelocity = finalConstraint.maxVelocity / (Math.abs(radius) + 1);
+                double angularVelocity = 0;
                 double maxLinearVelocity = finalConstraint.maxVelocity - angularVelocity;
                 newLinearVelocity = Math.min(newLinearVelocity, maxLinearVelocity);
 

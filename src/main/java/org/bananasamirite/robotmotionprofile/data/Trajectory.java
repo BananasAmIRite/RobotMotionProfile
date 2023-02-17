@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.bananasamirite.robotmotionprofile.ParametricSpline;
+import org.bananasamirite.robotmotionprofile.TankMotionProfile;
 import org.bananasamirite.robotmotionprofile.Waypoint;
 import org.bananasamirite.robotmotionprofile.TankMotionProfile.ProfileMethod;
 import org.bananasamirite.robotmotionprofile.data.task.CommandTask;
@@ -112,5 +114,28 @@ public class Trajectory {
 
     public void toJsonFile(File f) throws IOException {
         mapper.writeValue(f, this);
+    }
+
+    public static void main(String[] args) throws JsonProcessingException {
+//        List<TrajectoryTask> tasks = new ArrayList<>();
+//        tasks.add(new CommandTask("testCommand", "a", 1.0, 2));
+//        List<Waypoint> waypoints = List.of(new Waypoint(0, 0, 0, 1, 1), new Waypoint(1, 1, Math.toRadians(90), 1, 1));
+//        TankMotionProfile.TankMotionProfileConstraints constraints = new TankMotionProfile.TankMotionProfileConstraints(1, 1);
+//        TankMotionProfile p = new TankMotionProfile(ParametricSpline.fromWaypoints(waypoints), TankMotionProfile.ProfileMethod.TIME, constraints);
+//        tasks.add(new WaypointTask(waypoints, TankMotionProfile.ProfileMethod.TIME, constraints));
+//        tasks.add(new GeneratedWaypointTask(waypoints, TankMotionProfile.ProfileMethod.TIME, constraints, p.getNodes()));
+//        String t = mapper.writeValueAsString(new Trajectory(tasks));
+//        System.out.println(t);
+        Waypoint[] w = new Waypoint[] {
+                new Waypoint(0, 0, 0, 1, 1),
+                new Waypoint(1, -1, Math.toRadians(-90), 1, 1),
+                new Waypoint(2, -1, 0, 1, 1)
+        };
+        ParametricSpline s = ParametricSpline.fromWaypoints(w);
+        TankMotionProfile p = new TankMotionProfile(s, TankMotionProfile.ProfileMethod.TIME, new TankMotionProfile.TankMotionProfileConstraints(1, 0.5));
+        double totalTime = p.getTotalTime();
+        for (double i = 0; i < totalTime; i += 0.01) {
+            System.out.println(p.getStateAtTime(i));
+        }
     }
 }
