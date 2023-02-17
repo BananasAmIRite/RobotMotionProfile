@@ -81,7 +81,7 @@ public class ParametricSpline {
 
     public double signedCurvatureAt(double time) {
         if (reversed) time = this.totalTime - time;
-        return (getDxAtTime(time) * getDdyAtTime(time) + getDyAtTime(time) * getDdxAtTime(time)) / Math.pow(Math.pow(getDxAtTime(time), 2) + Math.pow(getDyAtTime(time), 2), 3.0/2);
+        return (getDxAtTime(time) * getDdyAtTime(time) - getDyAtTime(time) * getDdxAtTime(time)) / Math.pow(Math.pow(getDxAtTime(time), 2) + Math.pow(getDyAtTime(time), 2), 3.0/2);
     }
 
     public double signedRadiusAt(double time) {
