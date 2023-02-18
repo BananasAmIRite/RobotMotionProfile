@@ -209,7 +209,6 @@ public class TankMotionProfile {
         while (true) {
             double time = (timeLower + timeUpper) / 2;
             double dist = spline.getArcLengthAtTime(time, precision);
-            System.out.println(Math.abs(timeUpper - timeLower));
             if (Math.abs(distance - dist) <= precision || Math.abs(timeUpper - timeLower) < 1E-9) return time; // either we've zeroed in on a time or the distance is precise enough
             if (distance - dist < 0) timeUpper = time;
             if (distance - dist > 0) timeLower = time;

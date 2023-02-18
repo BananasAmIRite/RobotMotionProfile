@@ -30,7 +30,6 @@ public class WaypointTask extends TrajectoryTask {
         this.method = method;
         this.constraints = constraints;
         this.reversed = reversed;
-        System.out.println(reversed);
     }
 
     public List<Waypoint> getWaypoints() {
