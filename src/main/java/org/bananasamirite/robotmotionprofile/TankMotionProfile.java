@@ -293,7 +293,8 @@ public class TankMotionProfile {
     }
 
     public double getTotalTime() {
-        return this.nodes.get(this.nodes.size() - 1).totalTime; 
+        MotionProfileNode lastNode = this.nodes.get(this.nodes.size() - 1) 
+        return lastNode.totalTime + lastNode.time; 
     }
 
     public static class MotionProfileState {
