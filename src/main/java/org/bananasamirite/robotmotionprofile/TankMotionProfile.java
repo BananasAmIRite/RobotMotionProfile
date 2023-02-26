@@ -232,6 +232,7 @@ public class TankMotionProfile {
 
                 return new MotionProfileState(
                         node.velocity + node.acceleration * dt,
+                        node.angularVelocity, 
                         dt,
                         time,
                         new Position(
@@ -260,7 +261,7 @@ public class TankMotionProfile {
 
                 // https://www.desmos.com/calculator/zpzf9dpnh2
 
-                double angularVelocity = node.velocity * node.curvature;
+                double angularVelocity = node.angularVelocity;
                 double angularAcceleration = (nextNode.velocity * nextNode.curvature - node.velocity * node.curvature) / (node.time);
 
                 double dx = IntegrationUtils.integrate((t) -> (node.velocity + node.acceleration * t) *
@@ -280,6 +281,7 @@ public class TankMotionProfile {
 
                 return new MotionProfileState(
                         node.velocity + node.acceleration * dt,
+                        angularVelocity, 
                         dt,
                         time,
                         new Position(node.pose.getX() + dx, node.pose.getY() + dy,
@@ -300,14 +302,16 @@ public class TankMotionProfile {
 
     public static class MotionProfileState {
         private final double velocity;
+        private final double angularVelocity; 
         private final double time;
         private final double totalTime;
         private final Position pose;
         private final double curvature;
         private final double acceleration;
 
-        public MotionProfileState(double velocity, double time, double totalTime, Position pose, double curvature, double acceleration) {
+        public MotionProfileState(double velocity, double angularVelocity, double time, double totalTime, Position pose, double curvature, double acceleration) {
             this.velocity = velocity;
+            this.angularVelocity = angularVelocity; 
             this.time = time;
             this.totalTime = totalTime;
             this.pose = pose;
@@ -317,6 +321,10 @@ public class TankMotionProfile {
 
         public double getVelocity() {
             return velocity;
+        }
+
+        public double getAngularVelocity() {
+            return angularVelocity; 
         }
 
         public Position getPose() {
@@ -439,7 +447,7 @@ public class TankMotionProfile {
         }
 
         public MotionProfileState asState() {
-            return new MotionProfileState(velocity, time, totalTime, pose, curvature, acceleration);
+            return new MotionProfileState(velocity, angularVelocity, time, totalTime, pose, curvature, acceleration);
         }
 
         @Override
