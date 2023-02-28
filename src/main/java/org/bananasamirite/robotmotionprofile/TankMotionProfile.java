@@ -52,9 +52,9 @@ public class TankMotionProfile {
                 // vf^2 = v0^2+2ad
 
                 double newLinearVelocity = Math.sqrt(Math.pow(lastNode.velocity, 2) + 2 * finalConstraint.maxAcceleration * nodeLength);
-                double angularVelocity = finalConstraint.maxVelocity / (Math.abs(radius) + 1);
+                double angularVelocity = Math.min(newLinearVelocity, finalConstraint.maxVelocity) / (Math.abs(radius) + 1);
                 // double angularVelocity = 0;
-                double maxLinearVelocity = finalConstraint.maxVelocity - angularVelocity;
+                double maxLinearVelocity = Math.min(newLinearVelocity, finalConstraint.maxVelocity) - angularVelocity;
                 newLinearVelocity = Math.min(newLinearVelocity, maxLinearVelocity);
 
                 MotionProfileNode node = new MotionProfileNode(newLinearVelocity, angularVelocity, 0, new Position(
@@ -83,9 +83,9 @@ public class TankMotionProfile {
                 double newLinearVelocity = Math.sqrt(Math.pow(lastNode.velocity, 2) + 2 * constraints.maxAcceleration * nodeLength);
 
                 double radius = spline.signedRadiusAt(curNode.splineTime);
-                double angularVelocity = constraints.maxVelocity / (Math.abs(radius) + 1);
+                double angularVelocity = Math.min(newLinearVelocity, constraints.maxVelocity) / (Math.abs(radius) + 1);
                 // double angularVelocity = 0;
-                double maxLinearVelocity = constraints.maxVelocity - angularVelocity;
+                double maxLinearVelocity = Math.min(newLinearVelocity, constraints.maxVelocity) - angularVelocity;
                 newLinearVelocity = Math.min(curNode.velocity, Math.min(newLinearVelocity, maxLinearVelocity));
 
                 curNode.velocity = newLinearVelocity;
@@ -143,9 +143,9 @@ public class TankMotionProfile {
 
                 // vf^2 = v0^2+2ad
                 double newLinearVelocity = Math.sqrt(Math.pow(lastNode.velocity, 2) + 2 * constraints.maxAcceleration * nodeLength);
-               double angularVelocity = constraints.maxVelocity / (Math.abs(radius) + 1);
+               double angularVelocity = Math.min(newLinearVelocity, constraints.maxVelocity) / (Math.abs(radius) + 1);
                 // double angularVelocity = 0;
-                double maxLinearVelocity = constraints.maxVelocity - angularVelocity;
+                double maxLinearVelocity = Math.min(newLinearVelocity, constraints.maxVelocity) - angularVelocity;
                 newLinearVelocity = Math.min(newLinearVelocity, maxLinearVelocity);
 
                 MotionProfileNode node = new MotionProfileNode(newLinearVelocity, angularVelocity, 0, new Position(

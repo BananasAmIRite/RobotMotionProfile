@@ -1,5 +1,7 @@
 package org.bananasamirite.robotmotionprofile;
 
+import com.fasterxml.jackson.databind.deser.impl.CreatorCandidate;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -120,5 +122,19 @@ public class ParametricSpline {
             timeSoFar += p.getRunTime();
         }
         return new ParametricSpline(paths, reversed);
+    }
+
+    public static void main(String[] args) {
+        ParametricSpline s = ParametricSpline.fromWaypoints(new Waypoint[] {
+                new Waypoint(0, 0, 0, 1, 1),
+                new Waypoint(1, 1, Math.toRadians(90), 1, 1)
+        });
+
+        TankMotionProfile profile = new TankMotionProfile(s, TankMotionProfile.ProfileMethod.TIME, new TankMotionProfile.TankMotionProfileConstraints(1, 0.2));
+
+        System.out.println(IntegrationUtils.integrate((a) -> {
+            TankMotionProfile.MotionProfileState state = profile.getStateAtTime(a);
+            return state.getAngularVelocity();
+        }, 0, profile.getTotalTime(), 1E-2) * 180 / Math.PI);
     }
 }
