@@ -52,12 +52,12 @@ public class TankMotionProfile {
                 // vf^2 = v0^2+2ad
 
                 double newLinearVelocity = Math.sqrt(Math.pow(lastNode.velocity, 2) + 2 * finalConstraint.maxAcceleration * nodeLength);
-                double angularVelocity = Math.min(newLinearVelocity, finalConstraint.maxVelocity) / (Math.abs(radius) + 1);
-                // double angularVelocity = 0;
-                double maxLinearVelocity = Math.min(newLinearVelocity, finalConstraint.maxVelocity) - angularVelocity;
+                double angularSpeed = Math.min(newLinearVelocity, finalConstraint.maxVelocity) / (Math.abs(radius) + 1);
+                // double angularSpeed = 0;
+                double maxLinearVelocity = Math.min(newLinearVelocity, finalConstraint.maxVelocity) - angularSpeed;
                 newLinearVelocity = Math.min(newLinearVelocity, maxLinearVelocity);
 
-                MotionProfileNode node = new MotionProfileNode(newLinearVelocity, angularVelocity, 0, new Position(
+                MotionProfileNode node = new MotionProfileNode(newLinearVelocity, angularSpeed * Math.signum(radius), 0, new Position(
                                 spline.getXAtTime(i),
                                 spline.getYAtTime(i),
                                 Math.atan2(spline.getDyAtTime(i), spline.getDxAtTime(i))
@@ -83,12 +83,13 @@ public class TankMotionProfile {
                 double newLinearVelocity = Math.sqrt(Math.pow(lastNode.velocity, 2) + 2 * constraints.maxAcceleration * nodeLength);
 
                 double radius = spline.signedRadiusAt(curNode.splineTime);
-                double angularVelocity = Math.min(newLinearVelocity, constraints.maxVelocity) / (Math.abs(radius) + 1);
-                // double angularVelocity = 0;
-                double maxLinearVelocity = Math.min(newLinearVelocity, constraints.maxVelocity) - angularVelocity;
+                double angularSpeed = Math.min(newLinearVelocity, constraints.maxVelocity) / (Math.abs(radius) + 1);
+                // double angularSpeed = 0;
+                double maxLinearVelocity = Math.min(newLinearVelocity, constraints.maxVelocity) - angularSpeed;
                 newLinearVelocity = Math.min(curNode.velocity, Math.min(newLinearVelocity, maxLinearVelocity));
 
                 curNode.velocity = newLinearVelocity;
+                curNode.angularVelocity = angularSpeed * Math.signum(radius);
                 lastNode = curNode;
             }
         }
@@ -113,6 +114,7 @@ public class TankMotionProfile {
             for (MotionProfileNode n : nodes) {
                 n.acceleration *= -1;
                 n.velocity *= -1;
+                n.angularVelocity *= -1;
             }
         }
 
@@ -170,7 +172,8 @@ public class TankMotionProfile {
                 double newLinearVelocity = Math.sqrt(Math.pow(lastNode.velocity, 2) + 2 * constraints.maxAcceleration * nodeLength);
 
                 double radius = spline.signedRadiusAt(curNode.splineTime);
-                double angularVelocity = constraints.maxVelocity / (Math.abs(radius) + 1);
+//                double angularVelocity = constraints.maxVelocity / (Math.abs(radius) + 1);
+                double angularVelocity = 0;
                 double maxLinearVelocity = constraints.maxVelocity - angularVelocity;
                 newLinearVelocity = Math.min(curNode.velocity, Math.min(newLinearVelocity, maxLinearVelocity));
 
